@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from pymongo import ASCENDING, DESCENDING
 import datetime
+import html
 
 now = datetime.datetime.now()
 site = 'pt.stackoverflow.com'
@@ -16,14 +17,17 @@ tags = ptso.tags()
 
 for tag in tags:
     try:
+        name = html.unescape(tag.json['name'])
+        tag.json['name'] = name
         tag.json.pop('_params_')
         tag.json['timestamp']=now
+
         db_tags.insert(tag.json)
-        print('INSERTED: {}'.format(tag.json['name']))
+        print('INSERTED: {}'.format(name))
     except DuplicateKeyError:
-        print('ERROR - DUP: {}'.format(tag.json['name']))
+        print('ERROR - DUP: {}'.format(name))
     except KeyError:
-        print('ERROR - KEY: {}'.format(tag.json['name']))
+        print('ERROR - KEY: {}'.format(name))
 
 db_tags.create_index([('name',ASCENDING)])
 db_tags.create_index([('count',DESCENDING)])
