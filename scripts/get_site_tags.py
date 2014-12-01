@@ -13,21 +13,28 @@ db = db_client[site.replace('.','_')]
 db_tags = db.tags
 
 ptso = stackexchange.Site(site)
-tags = ptso.tags()
 
-for tag in tags:
-    try:
-        name = html.unescape(tag.json['name'])
-        tag.json['name'] = name
-        tag.json.pop('_params_')
-        tag.json['timestamp']=now
-
-        db_tags.insert(tag.json)
-        print('INSERTED: {}'.format(name))
-    except DuplicateKeyError:
-        print('ERROR - DUP: {}'.format(name))
-    except KeyError:
-        print('ERROR - KEY: {}'.format(name))
+page=1 #These two should be received in "sys.argv"
+max_page=1000000000 #Too large to be true
+while(page<max_page):
+    tags = ptso.tags(page=page,pagesize=100,sort='name',order='asc')
+    if(len(tags)==0):
+        break
+    else:
+        page+=1
+        for i in range(len(tags)-1):
+            try:
+                tag=tags[i].json
+                name = html.unescape(tag['name'])
+                tag['name'] = name
+                tag.pop('_params_')
+                tag['timestamp']=now
+                db_tags.insert(tag)
+                print('INSERTED: {}'.format(name))
+            except DuplicateKeyError:
+                print('ERROR - DUP: {}'.format(name))
+            except KeyError:
+                print('ERROR - KEY: {}'.format(name))
 
 db_tags.create_index([('name',ASCENDING)])
 db_tags.create_index([('count',DESCENDING)])
