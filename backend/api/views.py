@@ -8,7 +8,7 @@ class TagViewSet(ViewSet):
     def list(self, request):
         site_name = request.GET.get('community')
         tags = Tag(site_name)
-        return Response(tags.get_all(pk))        
+        return Response(tags.get_all())        
 
     def retrieve(self, request, pk=None):
         site_name = request.GET.get('community')

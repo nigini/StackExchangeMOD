@@ -8,10 +8,13 @@ class Tag():
         db = db_client[site_name.replace('.','_')]
         self.db_tags = db.tags
 
-    def get_all(self, name):
+    def get_all(self):
         query = {} 
         result = self.db_tags.find(query)
-        return self._format_result(result)
+        to_return = []
+        for r in result:
+            to_return.append(self._format_result(r))
+        return to_return
 
     def get_by_name(self, name):
         query = {'name':name} 
